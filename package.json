@@ -1,0 +1,7 @@
+{
+  "name": "typescript-conversion-tracker",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Chris Dopuch",
+  "license": "MIT"
+}
