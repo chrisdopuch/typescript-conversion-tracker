@@ -1,7 +1,16 @@
 {
   "name": "typescript-conversion-tracker",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "build/index.js",
   "author": "Chris Dopuch",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --outDir build",
+    "dev": "ts-node ./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^13.7.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5"
+  }
 }
