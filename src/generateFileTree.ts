@@ -9,7 +9,7 @@ const tsFileEndings = ['ts', 'tsx'];
 const targetFileEndings = [...jsFileEndings, ...tsFileEndings];
 const ignoreDirectories = ['node_modules', '.git'];
 
-type FileTree = {
+export type FileTree = {
     files: {
         [name: string]: boolean // value is whether or not it's TypeScript
     }
