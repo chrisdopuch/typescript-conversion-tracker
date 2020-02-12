@@ -7,7 +7,7 @@ const readdir = promisify(_readdir);
 const jsFileEndings = ['js', 'jsx'];
 const tsFileEndings = ['ts', 'tsx'];
 const targetFileEndings = [...jsFileEndings, ...tsFileEndings];
-const ignoreDirectories = ['node_modules', '.git'];
+const ignoreDirectories = ['node_modules', '.git', 'build'];
 
 export type FileTree = {
     files: {
@@ -16,6 +16,7 @@ export type FileTree = {
     directories: {
         [name: string]: FileTree,
     }
+    coverage?: number,
 };
 
 type Acc<T> = {
@@ -28,6 +29,7 @@ function getFileExtension(f: string) {
 }
 
 function generateFileTree(location: string): Promise<FileTree> {
+    console.log('Generate file tree location: ', location);
     return new Promise(async (resolve, reject) => {
         try {
             // get all the entries in the current directory
@@ -59,6 +61,34 @@ function generateFileTree(location: string): Promise<FileTree> {
             reject(err);
         }
     });
+}
+
+export function calculateCoverage(tree: FileTree) {
+    const totalTSFiles = Object.keys(tree.files).map(f => tsFileEndings.includes(getFileExtension(f))).reduce((acc: number, val: boolean) => {
+        if (val) {
+            acc++
+        }
+        return acc;
+    }, 0);
+    const percentage = totalTSFiles / Object.keys(tree.files).length;
+    if (Object.keys(tree.directories).length === 0) {
+        tree.coverage = percentage;
+        return { percentage, fileCount: Object.keys(tree.files).length };
+    }
+    const childCoverage = Object.keys(tree.directories).reduce((acc: {[key: string]: {percentage: number, fileCount: number}}, directory) => { 
+        acc[directory] = calculateCoverage(tree.directories[directory]);
+        return acc;
+    }, {});
+    const totalFileCount = Object.keys(childCoverage).reduce((acc, val) => {
+        acc += childCoverage[val].fileCount;
+        return acc;
+    }, 0);
+    const totalPercentage = Object.keys(childCoverage).reduce((acc, val) => {
+        acc += childCoverage[val].fileCount * childCoverage[val].percentage;
+        return acc;
+    }, 0) / totalFileCount;
+    tree.coverage = totalPercentage;
+    return {percentage: totalPercentage, fileCount: totalFileCount};
 }
 
 export default generateFileTree;
